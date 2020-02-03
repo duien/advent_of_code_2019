@@ -6,6 +6,7 @@ defmodule AdventOfCode.Day3 do
   Examples:
       iex> AdventOfCode.Day3.part1("R75,D30,R83,U83,L12,D49,R71,U7,L72", "U62,R66,U55,R34,D71,R55,D58,R83")
       159
+
       iex> AdventOfCode.Day3.part1("R98,U47,R26,D63,R33,U87,L62,D20,R33,U53,R51", "U98,R91,D20,R16,D67,R40,U7,R15,U6,R7")
       135
   """
@@ -17,6 +18,15 @@ defmodule AdventOfCode.Day3 do
     end
   end
   def part1(wire1, wire2), do: closest_crossing(wire1, wire2)
+
+  def part2, do: with [wire1, wire2] = input(), do: part2(wire1, wire2)
+  def part2(wire1, wire2) when is_bitstring(wire1) and is_bitstring(wire2) do
+    with parsed1 <- parse_wire(wire1),
+         parsed2 <- parse_wire(wire2) do
+      part2(parsed1, parsed2)
+    end
+  end
+  def part2(wire1, wire2), do: fastest_crossing(wire1, wire2)
 
   @doc """
   Examples:
@@ -70,6 +80,32 @@ defmodule AdventOfCode.Day3 do
     crossings(wire1, wire2)
     |> Enum.map(fn {x,y} -> abs(x) + abs(y) end)
     |> Enum.min()
+  end
+
+  @doc """
+  Examples:
+      iex> wire1 = AdventOfCode.Day3.parse_wire("R8,U5,L5,D3")
+      iex> wire2 = AdventOfCode.Day3.parse_wire("U7,R6,D4,L4")
+      iex> AdventOfCode.Day3.fastest_crossing(wire1, wire2)
+      30
+
+      iex> wire1 = AdventOfCode.Day3.parse_wire("R75,D30,R83,U83,L12,D49,R71,U7,L72")
+      iex> wire2 = AdventOfCode.Day3.parse_wire("U62,R66,U55,R34,D71,R55,D58,R83")
+      iex> AdventOfCode.Day3.fastest_crossing(wire1, wire2)
+      610
+
+      iex> wire1 = AdventOfCode.Day3.parse_wire("R98,U47,R26,D63,R33,U87,L62,D20,R33,U53,R51")
+      iex> wire2 = AdventOfCode.Day3.parse_wire("U98,R91,D20,R16,D67,R40,U7,R15,U6,R7")
+      iex> AdventOfCode.Day3.fastest_crossing(wire1, wire2)
+      410
+  """
+  def fastest_crossing(wire1, wire2) do
+    with points1 <- points(wire1),
+         points2 <- points(wire2),
+         shared <- crossings(wire1, wire2) do
+      Enum.map(shared, fn p -> Enum.find_index(points1, &(&1 == p)) + Enum.find_index(points2, &(&1 == p)) + 2 end)
+      |> Enum.min
+    end
   end
 
   @doc """
